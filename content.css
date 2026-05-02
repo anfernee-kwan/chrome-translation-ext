@@ -1,8 +1,10 @@
 .__tr_zh {
   display: block;
-  margin: 4px 0 8px 0;
-  padding-left: 8px;
+  margin: 6px 0 10px 0;
+  padding: 6px 10px;
+  background: rgba(74, 144, 226, 0.08);
   border-left: 3px solid #4A90E2;
+  border-radius: 3px;
   color: #1f2937;
   font-size: 0.95em;
   line-height: 1.5;
