@@ -1,46 +1,107 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Bilingual Translator – Options</title>
-  <style>
-    body { font-family: -apple-system, sans-serif; max-width: 520px; margin: 24px auto; padding: 0 16px; color: #222; }
-    h1 { font-size: 20px; }
-    label { display: block; margin: 12px 0 4px; font-weight: 600; font-size: 13px; }
-    input, select { width: 100%; padding: 8px; box-sizing: border-box; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
-    button { margin-top: 16px; padding: 8px 16px; font-size: 14px; cursor: pointer; }
-    .row { display: flex; gap: 8px; align-items: center; }
-    .row button { margin: 0; }
-    #status { margin-top: 12px; font-size: 13px; }
-    .ok { color: #1a7f37; }
-    .err { color: #c0322b; }
-    .hint { font-size: 12px; color: #666; margin-top: 2px; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bilingual Translator - Options</title>
+  <link rel="stylesheet" href="options.css">
 </head>
 <body>
-  <h1>Bilingual Translator</h1>
+  <div class="page-shell">
+    <div class="page-glow page-glow-left"></div>
+    <div class="page-glow page-glow-right"></div>
 
-  <label for="provider">Provider</label>
-  <select id="provider">
-    <option value="anthropic">Anthropic (native /v1/messages)</option>
-    <option value="openai-compatible" disabled>OpenAI-compatible (not implemented)</option>
-  </select>
+    <main class="page-content">
+      <section class="hero card">
+        <div class="hero-copy">
+          <p class="eyebrow">Bilingual Translator</p>
+          <h1>Tune the engine behind every translation.</h1>
+          <p class="hero-text">
+            Configure your LLM provider, verify the connection, and keep the extension ready for fast
+            side-by-side Chinese translations on any page.
+          </p>
+        </div>
 
-  <label for="baseURL">Base URL</label>
-  <input id="baseURL" type="text" placeholder="https://api.anthropic.com">
-  <div class="hint">Without trailing slash. The extension will POST to {baseURL}/v1/messages.</div>
+        <div class="hero-badge" aria-label="Current support status">
+          <span class="hero-badge-label">Current support</span>
+          <strong>Anthropic native API</strong>
+          <p>OpenAI-compatible endpoints can be added later without changing your workflow.</p>
+        </div>
+      </section>
 
-  <label for="apiKey">API Key</label>
-  <input id="apiKey" type="password" placeholder="sk-...">
+      <section class="content-grid">
+        <section class="card form-card" aria-labelledby="settings-heading">
+          <div class="section-heading">
+            <p class="section-kicker">Settings</p>
+            <h2 id="settings-heading">Connection details</h2>
+            <p>
+              Save your preferred provider configuration locally in the extension, then run a quick
+              connection test before translating pages.
+            </p>
+          </div>
 
-  <label for="model">Model</label>
-  <input id="model" type="text" placeholder="claude-haiku-4-5-20251001">
+          <div class="field-grid">
+            <label class="field" for="provider">
+              <span class="field-label">Provider</span>
+              <span class="field-help">Choose the translation backend used by the extension.</span>
+              <select id="provider">
+                <option value="anthropic">Anthropic (native /v1/messages)</option>
+                <option value="openai-compatible" disabled>OpenAI-compatible (coming soon)</option>
+              </select>
+            </label>
 
-  <div class="row">
-    <button id="save">Save</button>
-    <button id="test">Test connection</button>
+            <label class="field field-wide" for="baseURL">
+              <span class="field-label">Base URL</span>
+              <span class="field-help">No trailing slash. Requests are sent to <code>{baseURL}/v1/messages</code>.</span>
+              <input id="baseURL" type="text" inputmode="url" placeholder="https://api.anthropic.com" autocomplete="off">
+            </label>
+
+            <label class="field" for="apiKey">
+              <span class="field-label">API key</span>
+              <span class="field-help">Stored locally in <code>chrome.storage.local</code> for this extension.</span>
+              <input id="apiKey" type="password" placeholder="sk-ant-..." autocomplete="off">
+            </label>
+
+            <label class="field" for="model">
+              <span class="field-label">Model</span>
+              <span class="field-help">Pick the model that balances speed, quality, and cost for you.</span>
+              <input id="model" type="text" placeholder="claude-haiku-4-5-20251001" autocomplete="off">
+            </label>
+          </div>
+
+          <div class="action-bar">
+            <div class="button-row">
+              <button id="save" type="button" class="button button-primary">Save settings</button>
+              <button id="test" type="button" class="button button-secondary">Test connection</button>
+            </div>
+            <p class="microcopy">Tip: save once after changing credentials so the background worker uses the latest values.</p>
+          </div>
+
+          <div id="status" class="status" role="status" aria-live="polite"></div>
+        </section>
+
+        <aside class="card sidebar-card" aria-label="Configuration guidance">
+          <div class="sidebar-section">
+            <p class="section-kicker">Quick checks</p>
+            <h2>Before you translate</h2>
+            <ul class="checklist">
+              <li>Use the provider's root API domain without a trailing slash.</li>
+              <li>Keep the API key scoped to translation usage when possible.</li>
+              <li>Run a connection test after switching models or endpoints.</li>
+            </ul>
+          </div>
+
+          <div class="sidebar-section sidebar-callout">
+            <p class="section-kicker">Recommended baseline</p>
+            <p class="callout-copy">
+              For lightweight page translation, start with an efficient model like
+              <code>claude-haiku-4-5-20251001</code> and increase quality only when needed.
+            </p>
+          </div>
+        </aside>
+      </section>
+    </main>
   </div>
-  <div id="status"></div>
 
   <script type="module" src="options.js"></script>
 </body>
