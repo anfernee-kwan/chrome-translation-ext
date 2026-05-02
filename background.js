@@ -1,8 +1,9 @@
 import { translate } from './lib/providers.js';
 
-// Per-tab state: 'untranslated' | 'translating' | 'shown' | 'hidden'
-const tabState = new Map();
-const STATE = { U: 'untranslated', ING: 'translating', S: 'shown', H: 'hidden' };
+// Transient state for in-flight translations only. Persistent translation
+// status (translated / hidden) lives in the content script and is queried
+// per click via 'status' — this survives service-worker restarts.
+const inFlight = new Set(); // tabIds currently being translated
 
 async function getConfig() {
   const cfg = await chrome.storage.local.get(['provider', 'baseURL', 'apiKey', 'model']);
@@ -33,13 +34,42 @@ async function setBadge(tabId, text, color) {
   } catch {}
 }
 
+function scheduleBadgeClear(tabId, seconds = 5) {
+  // chrome.alarms survives SW restarts; setTimeout does not.
+  chrome.alarms.create(`clearBadge:${tabId}`, { delayInMinutes: seconds / 60 });
+}
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name.startsWith('clearBadge:')) {
+    const tabId = parseInt(alarm.name.slice('clearBadge:'.length), 10);
+    if (Number.isFinite(tabId)) setBadge(tabId, '', null);
+  }
+});
+
+function isLifecycleError(e) {
+  const m = String(e && e.message || e || '');
+  return /Receiving end does not exist|message channel closed|Could not establish connection|context invalidated/i.test(m);
+}
+
+async function sendToTab(tabId, msg) {
+  return await chrome.tabs.sendMessage(tabId, msg);
+}
+
 async function pingContent(tabId) {
   try {
-    const r = await chrome.tabs.sendMessage(tabId, { type: 'ping' });
+    const r = await sendToTab(tabId, { type: 'ping' });
     return !!(r && r.ok);
   } catch {
     return false;
   }
+}
+
+async function getStatus(tabId) {
+  try {
+    const r = await sendToTab(tabId, { type: 'status' });
+    if (r && r.ok) return { translated: !!r.translated, hidden: !!r.hidden };
+  } catch {}
+  return null;
 }
 
 function isRestrictedUrl(url) {
@@ -70,51 +100,61 @@ chrome.action.onClicked.addListener(async (tab) => {
     return;
   }
 
-  const cfg = await getConfig();
-  const state = tabState.get(tabId) || STATE.U;
+  if (inFlight.has(tabId)) return; // ignore clicks during translation
 
-  if (state === STATE.ING) return; // ignore clicks during translation
+  // Ask content script for ground-truth state. Survives SW restarts.
+  const status = await getStatus(tabId);
 
-  if (state === STATE.S || state === STATE.H) {
-    const res = await chrome.tabs.sendMessage(tabId, { type: 'toggle' });
-    tabState.set(tabId, res && res.hidden ? STATE.H : STATE.S);
+  if (status && status.translated) {
+    try {
+      await sendToTab(tabId, { type: 'toggle' });
+    } catch (e) {
+      if (!isLifecycleError(e)) {
+        console.warn('[bilingual] toggle failed', e);
+      }
+    }
     return;
   }
 
-  // untranslated → translate
+  // Untranslated → translate.
+  const cfg = await getConfig();
   if (!isConfigured(cfg)) {
     await notify('Bilingual Translator', 'Configure provider/baseURL/apiKey/model in the options page first.');
     return;
   }
 
-  tabState.set(tabId, STATE.ING);
+  inFlight.add(tabId);
   await setBadge(tabId, '...', '#4A90E2');
 
   let res;
   try {
-    res = await chrome.tabs.sendMessage(tabId, { type: 'translate' });
+    res = await sendToTab(tabId, { type: 'translate' });
   } catch (e) {
+    inFlight.delete(tabId);
+    // Silent if the page navigated or was closed mid-translation.
+    if (isLifecycleError(e)) {
+      await setBadge(tabId, '', null);
+      return;
+    }
     await setBadge(tabId, '!', '#c0322b');
-    tabState.set(tabId, STATE.U);
     await notify('Bilingual Translator', `Translation failed: ${e.message}`);
-    setTimeout(() => setBadge(tabId, '', null), 4000);
+    scheduleBadgeClear(tabId);
     return;
   }
 
+  inFlight.delete(tabId);
+
   if (res && res.ok) {
-    tabState.set(tabId, STATE.S);
-    if (typeof res.total === 'number') {
-      const txt = res.success === res.total ? '' : `${res.success}/${res.total}`;
-      await setBadge(tabId, txt, txt ? '#c0322b' : null);
-      if (txt) setTimeout(() => setBadge(tabId, '', null), 4000);
+    if (typeof res.total === 'number' && res.success !== res.total) {
+      await setBadge(tabId, `${res.success}/${res.total}`, '#c0322b');
+      scheduleBadgeClear(tabId);
     } else {
       await setBadge(tabId, '', null);
     }
   } else {
-    tabState.set(tabId, STATE.U);
     await setBadge(tabId, '!', '#c0322b');
     await notify('Bilingual Translator', `Translation failed: ${(res && res.error) || 'unknown'}`);
-    setTimeout(() => setBadge(tabId, '', null), 4000);
+    scheduleBadgeClear(tabId);
   }
 });
 
@@ -135,13 +175,13 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   }
 });
 
-// Reset state when tab closes or navigates away in main frame.
+// Clear in-flight tracking when tab closes or navigates away in main frame.
 chrome.tabs.onRemoved.addListener((tabId) => {
-  tabState.delete(tabId);
+  inFlight.delete(tabId);
 });
 
 chrome.webNavigation.onCommitted.addListener((details) => {
   if (details.frameId === 0) {
-    tabState.delete(details.tabId);
+    inFlight.delete(details.tabId);
   }
 });

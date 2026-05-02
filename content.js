@@ -200,4 +200,12 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     sendResponse({ ok: true });
     return false;
   }
+  if (msg && msg.type === 'status') {
+    sendResponse({
+      ok: true,
+      translated,
+      hidden: document.body.classList.contains('__tr_hidden'),
+    });
+    return false;
+  }
 });
