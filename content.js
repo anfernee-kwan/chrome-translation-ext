@@ -9,8 +9,10 @@ const SELECTOR = [
   'div[lang]', 'span[lang]',
   'div[data-testid="tweetText"]',
   '[role="article"]',
+  // X/Twitter long-form articles use Draft.js: each paragraph is .public-DraftStyleDefault-block
+  '.public-DraftStyleDefault-block',
 ].join(', ');
-const LEAF_BLOCKER = 'p, li, h1, h2, h3, h4, h5, h6, blockquote, td, article, [data-testid="tweetText"]';
+const LEAF_BLOCKER = 'p, li, h1, h2, h3, h4, h5, h6, blockquote, td, article, [data-testid="tweetText"], .public-DraftStyleDefault-block';
 const MIN_LEN = 4;
 const CN_RATIO_SKIP = 0.5;
 const MAX_CHARS = 2000;
