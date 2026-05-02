@@ -2,7 +2,15 @@
 // so the batcher/parser logic is duplicated here intentionally — these modules
 // remain the source of truth and are unit-tested. Keep them in sync.
 
-const SELECTOR = 'p, li, h1, h2, h3, h4, h5, h6, blockquote, td';
+const SELECTOR = [
+  'p', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'td',
+  // SPA / semantic content containers that hold paragraph-like text without using <p>.
+  'article',
+  'div[lang]', 'span[lang]',
+  'div[data-testid="tweetText"]',
+  '[role="article"]',
+].join(', ');
+const LEAF_BLOCKER = 'p, li, h1, h2, h3, h4, h5, h6, blockquote, td, article, [data-testid="tweetText"]';
 const MIN_LEN = 4;
 const CN_RATIO_SKIP = 0.5;
 const MAX_CHARS = 2000;
@@ -22,7 +30,7 @@ function isMostlyChinese(text) {
 
 function shouldSkip(el) {
   if (el.closest('code, pre, script, style, textarea, [contenteditable="true"]')) return true;
-  if (el.querySelector('p, li, h1, h2, h3, h4, h5, h6, blockquote, td')) return true; // container, not leaf
+  if (el.querySelector(LEAF_BLOCKER)) return true; // container, not leaf
   if (el.dataset.trDone === '1') return true;
   return false;
 }
