@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Bilingual Translator",
+  "version": "0.1.0",
+  "description": "Translate foreign-language pages to Simplified Chinese inline, side-by-side with the original.",
+  "permissions": ["storage", "scripting", "notifications", "webNavigation"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    },
+    "default_title": "Translate this page"
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "options_page": "options.html",
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"],
+    "css": ["content.css"],
+    "run_at": "document_idle"
+  }]
+}
