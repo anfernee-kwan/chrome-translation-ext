@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Bilingual Translator – Options</title>
+  <style>
+    body { font-family: -apple-system, sans-serif; max-width: 520px; margin: 24px auto; padding: 0 16px; color: #222; }
+    h1 { font-size: 20px; }
+    label { display: block; margin: 12px 0 4px; font-weight: 600; font-size: 13px; }
+    input, select { width: 100%; padding: 8px; box-sizing: border-box; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
+    button { margin-top: 16px; padding: 8px 16px; font-size: 14px; cursor: pointer; }
+    .row { display: flex; gap: 8px; align-items: center; }
+    .row button { margin: 0; }
+    #status { margin-top: 12px; font-size: 13px; }
+    .ok { color: #1a7f37; }
+    .err { color: #c0322b; }
+    .hint { font-size: 12px; color: #666; margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <h1>Bilingual Translator</h1>
+
+  <label for="provider">Provider</label>
+  <select id="provider">
+    <option value="anthropic">Anthropic (native /v1/messages)</option>
+    <option value="openai-compatible" disabled>OpenAI-compatible (not implemented)</option>
+  </select>
+
+  <label for="baseURL">Base URL</label>
+  <input id="baseURL" type="text" placeholder="https://api.anthropic.com">
+  <div class="hint">Without trailing slash. The extension will POST to {baseURL}/v1/messages.</div>
+
+  <label for="apiKey">API Key</label>
+  <input id="apiKey" type="password" placeholder="sk-...">
+
+  <label for="model">Model</label>
+  <input id="model" type="text" placeholder="claude-haiku-4-5-20251001">
+
+  <div class="row">
+    <button id="save">Save</button>
+    <button id="test">Test connection</button>
+  </div>
+  <div id="status"></div>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>
