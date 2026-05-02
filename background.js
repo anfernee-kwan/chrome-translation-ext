@@ -1,4 +1,9 @@
 import { translate } from './lib/providers.js';
+import {
+  DEFAULT_TARGET_LANGUAGE,
+  getRuntimeLocaleCandidates,
+  resolvePreferredTargetLanguage,
+} from './lib/targetLanguages.js';
 
 // Transient state for in-flight translations only. Persistent translation
 // status (translated / hidden) lives in the content script and is queried
@@ -6,12 +11,16 @@ import { translate } from './lib/providers.js';
 const inFlight = new Set(); // tabIds currently being translated
 
 async function getConfig() {
-  const cfg = await chrome.storage.local.get(['provider', 'baseURL', 'apiKey', 'model']);
+  const keys = ['provider', 'baseURL', 'apiKey', 'model', 'targetLanguage'];
+  const cfg = await chrome.storage.local.get(keys);
+  if (!cfg.targetLanguage) {
+    cfg.targetLanguage = resolvePreferredTargetLanguage(getRuntimeLocaleCandidates()) || DEFAULT_TARGET_LANGUAGE;
+  }
   return cfg;
 }
 
 function isConfigured(cfg) {
-  return cfg && cfg.provider && cfg.baseURL && cfg.apiKey && cfg.model;
+  return cfg && cfg.provider && cfg.baseURL && cfg.apiKey && cfg.model && cfg.targetLanguage;
 }
 
 async function notify(title, message) {
@@ -116,7 +125,7 @@ chrome.action.onClicked.addListener(async (tab) => {
     return;
   }
 
-  // Untranslated → translate.
+  // Untranslated -> translate.
   const cfg = await getConfig();
   if (!isConfigured(cfg)) {
     await notify('Bilingual Translator', 'Configure provider/baseURL/apiKey/model in the options page first.');

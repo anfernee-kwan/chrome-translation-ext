@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Bilingual Translator",
   "version": "0.1.0",
-  "description": "Translate foreign-language pages to Simplified Chinese inline, side-by-side with the original.",
+  "description": "Translate foreign-language pages into your selected target language inline, side-by-side with the original.",
   "permissions": ["storage", "scripting", "notifications", "webNavigation", "alarms"],
   "host_permissions": ["<all_urls>"],
   "background": {

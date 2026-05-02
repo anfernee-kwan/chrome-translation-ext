@@ -17,8 +17,8 @@
           <p class="eyebrow">Bilingual Translator</p>
           <h1>Tune the engine behind every translation.</h1>
           <p class="hero-text">
-            Configure your LLM provider, verify the connection, and keep the extension ready for fast
-            side-by-side Chinese translations on any page.
+            Configure your LLM provider, choose the target language, verify the connection, and keep the
+            extension ready for fast side-by-side translations on any page.
           </p>
         </div>
 
@@ -41,6 +41,12 @@
           </div>
 
           <div class="field-grid">
+            <label class="field" for="targetLanguage">
+              <span class="field-label">Target language</span>
+              <span class="field-help">Defaults to your browser or operating-system language when supported.</span>
+              <select id="targetLanguage"></select>
+            </label>
+
             <label class="field" for="provider">
               <span class="field-label">Provider</span>
               <span class="field-help">Choose the translation backend used by the extension.</span>
@@ -94,8 +100,8 @@
           <div class="sidebar-section sidebar-callout">
             <p class="section-kicker">Recommended baseline</p>
             <p class="callout-copy">
-              For lightweight page translation, start with an efficient model like
-              <code>claude-haiku-4-5-20251001</code> and increase quality only when needed.
+              The target-language menu covers the current top 10 languages by total speakers, so most readers
+              can start with a familiar output language before fine-tuning model quality.
             </p>
           </div>
         </aside>
