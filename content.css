@@ -1,0 +1,22 @@
+.__tr_zh {
+  display: block;
+  margin: 4px 0 8px 0;
+  padding-left: 8px;
+  border-left: 3px solid #ccc;
+  color: #666;
+  font-size: 0.95em;
+  line-height: 1.5;
+  font-family: inherit;
+  white-space: normal;
+}
+body.__tr_hidden .__tr_zh {
+  display: none !important;
+}
+td .__tr_zh,
+li .__tr_zh {
+  margin: 2px 0 0 0;
+}
+.__tr_busy {
+  outline: 2px dashed rgba(74, 144, 226, 0.5);
+  outline-offset: 2px;
+}
