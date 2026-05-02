@@ -4,8 +4,6 @@ A Chrome MV3 extension that translates foreign-language webpages to Simplified C
 
 Translation is powered by an Anthropic-compatible API you configure (e.g. Claude Haiku via your own base URL + API key).
 
-![translate-demo](https://via.placeholder.com/600x300?text=demo+screenshot+goes+here)
-
 ## Features
 
 - **One-click translation** — click toolbar icon, get every paragraph translated underneath the original
