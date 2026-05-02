@@ -42,12 +42,31 @@ async function pingContent(tabId) {
   }
 }
 
+function isRestrictedUrl(url) {
+  if (!url) return true;
+  return /^(chrome|chrome-extension|edge|about|devtools|view-source):/i.test(url)
+    || /^https?:\/\/chrome\.google\.com\/webstore/i.test(url);
+}
+
+async function ensureContentScript(tabId, url) {
+  if (await pingContent(tabId)) return true;
+  if (isRestrictedUrl(url)) return false;
+  try {
+    await chrome.scripting.insertCSS({ target: { tabId }, files: ['content.css'] });
+    await chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] });
+  } catch (e) {
+    console.warn('[bilingual] inject failed', e);
+    return false;
+  }
+  return await pingContent(tabId);
+}
+
 chrome.action.onClicked.addListener(async (tab) => {
   if (!tab || !tab.id) return;
   const tabId = tab.id;
 
-  if (!(await pingContent(tabId))) {
-    await notify('Bilingual Translator', 'This page does not support translation (chrome://, PDF viewer, or restricted page).');
+  if (!(await ensureContentScript(tabId, tab.url))) {
+    await notify('Bilingual Translator', 'This page does not support translation (chrome://, web store, PDF viewer, or restricted page).');
     return;
   }
 
