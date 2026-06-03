@@ -11,8 +11,10 @@ const SELECTOR = [
   '[role="article"]',
   // X/Twitter long-form articles use Draft.js: each paragraph is .public-DraftStyleDefault-block
   '.public-DraftStyleDefault-block',
+  // Mintlify docs (e.g. code.claude.com) render paragraphs as <span data-as="p">.
+  '[data-as="p"]', '[data-as="h1"]', '[data-as="h2"]', '[data-as="h3"]', '[data-as="h4"]',
 ].join(', ');
-const LEAF_BLOCKER = 'p, li, h1, h2, h3, h4, h5, h6, blockquote, td, article, [data-testid="tweetText"], .public-DraftStyleDefault-block';
+const LEAF_BLOCKER = 'p, li, h1, h2, h3, h4, h5, h6, blockquote, td, article, [data-testid="tweetText"], .public-DraftStyleDefault-block, [data-as="p"], [data-as="h1"], [data-as="h2"], [data-as="h3"], [data-as="h4"]';
 const MIN_LEN = 4;
 const CN_RATIO_SKIP = 0.5;
 const MAX_CHARS = 2000;
